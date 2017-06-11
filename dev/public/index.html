@@ -21,6 +21,8 @@
 <div id="buttons"></div>
 </body>
 <script type="text/javascript">
+    if(!window.WebSocket)
+        alert("浏览器不支持！")
     var myCanvas=null;
     console.log("I am not ready!");
     window.onload = function(){
@@ -41,10 +43,20 @@
         <!--// Fill with gradient-->
         <!--ctx.fillStyle=gradient;-->
         <!--ctx.fillText("w3school.com.cn",10,90);-->
+        initWebSocket()
     }
 
     function initWebSocket(){
-        websocket
+        websocket = new WebSocket("ws://localhost:8888/connection");
+        websocket.onopen = function(){
+            console.log("websocket connected")
+        };
+        websocket.onclose = function(evt){
+            alert("连接已经断开")
+        };
+        websocket.onmessage = function(evt){
+            console.log(evt.data)
+        };
     }
 </script>
 </html>
