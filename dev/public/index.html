@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><meta charset="utf-8">
+<head>
+    <meta charset="UTF-8">
+    <title>设备</title>
+</head>
+<style type="text/css">
+    canvas#deviceview {
+        width:450px;
+        height:800px;
+        border-color:blue blue blue blue;
+        border-width:5px 5px 5px 5px;
+        border-style:solid solid solid solid;
+        background:green;
+    }
+</style>
+
+<body>
+<canvas id="deviceview">
+</canvas>
+<div id="buttons"></div>
+</body>
+<script type="text/javascript">
+    var myCanvas=null;
+    console.log("I am not ready!");
+    window.onload = function(){
+        myCanvas = document.getElementById("deviceview");
+        var ctx = myCanvas.getContext("2d");
+        <!--ctx.font="30px Verdana";-->
+        <!--ctx.fillText("欢迎使用！", 100,200)；-->
+
+        ctx.font="20px Georgia";
+        ctx.fillText("欢迎使用!",10,50);
+
+        <!--ctx.font="30px Verdana";-->
+        <!--// Create gradient-->
+        <!--var gradient=ctx.createLinearGradient(0,0,ctx.width,0);-->
+        <!--gradient.addColorStop("0","magenta");-->
+        <!--gradient.addColorStop("0.5","blue");-->
+        <!--gradient.addColorStop("1.0","red");-->
+        <!--// Fill with gradient-->
+        <!--ctx.fillStyle=gradient;-->
+        <!--ctx.fillText("w3school.com.cn",10,90);-->
+    }
+
+    function initWebSocket(){
+        websocket
+    }
+</script>
+</html>

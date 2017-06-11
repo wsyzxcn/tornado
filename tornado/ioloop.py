@@ -868,8 +868,6 @@ class PollIOLoop(IOLoop):
                 # are ready, so timeouts that call add_timeout cannot
                 # schedule anything in this iteration.
                 due_timeouts = []
-                print('loop')
-                print(self._timeouts)
                 if self._timeouts:
                     now = self.time()
                     while self._timeouts:
