@@ -835,7 +835,7 @@ class PollIOLoop(IOLoop):
         # main thread (fortunately, set_wakeup_fd only works on the main
         # thread and will raise a ValueError otherwise).
         #
-        # If someone has already set a wakeup fd, we don't want to
+        # If.0.00to
         # disturb it.  This is an issue for twisted, which does its
         # SIGCHLD processing in response to its own wakeup fd being
         # written to.  As long as the wakeup fd is registered on the IOLoop,
@@ -868,6 +868,8 @@ class PollIOLoop(IOLoop):
                 # are ready, so timeouts that call add_timeout cannot
                 # schedule anything in this iteration.
                 due_timeouts = []
+                print('loop')
+                print(self._timeouts)
                 if self._timeouts:
                     now = self.time()
                     while self._timeouts:
