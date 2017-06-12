@@ -18,7 +18,6 @@ class SocketHandler():
         return serversocket.fileno()
 
     def onMessage(self, fd, evt):
-        print evt
         if evt == ioloop.IOLoop.READ:
             sock = self._socks[fd]
             LENGTH = 1024
@@ -27,7 +26,7 @@ class SocketHandler():
             while LENGTH == L:
                 s = sock.recv(LENGTH)
                 L = len(s)
-                buf = buf.join(s)
+                buf = buf+s
             if buf:
                 if not self._chunks.has_key(fd):
                     self._chunks[fd] = Chunk()
@@ -44,7 +43,6 @@ class SocketHandler():
             ioloop.IOLoop.current().remove_handler(fd)
             sock.close()
             del self._socks[fd]
-            print self._socks
         except:
             print traceback.format_exc()
 
@@ -72,14 +70,15 @@ class Chunk():
 
     def getNextLine(self):
         i = self._index
-        print 'get line', self._index
-        print self._data[self._index:]
+        print 'get line'
+        print 'data:', self._data
         while True:
             if i >= len(self._data):
                 print 'should raise'
                 raise NotEnoughtData()
             # print 'i:', i, len(self._data)
             if self._data[i] == '\n':
+                print 'get line succeed'
                 break
             i += 1
         while True:
@@ -98,31 +97,38 @@ class Chunk():
         pass
 
     def add(self, chunk):
-        print chunk
-        self._data = self._data.join(chunk)
+        print 'chunk:', chunk
+        self._data = self._data+chunk
+        print 'before:', self._data
         try:
             while True:
                 if self._state == 'new':
-                    print 'new'
+                    print 'status: new'
+                    print self
                     s = self.getNextLine()
-                    print 'line:', s
+                    print 's:', s
+                    if not s.strip():
+                        continue
                     self._headerCount = int(s)
                     self._state = 'header'
                 elif self._state == 'header':
                     s = self.getNextLine()
-                    print 's is ', s
+                    if not s.strip():
+                        continue
                     m = re.match("^([^:]*):([^:]*)$", s)
                     key = m.groups()[0]
                     value = m.groups()[1]
                     self._header[key] = value
-                    if len(self._header.keys())==self._headerCount:
+                    if len(self._header.keys()) == self._headerCount:
                         self._state = 'data'
                 elif self._state == 'data':
-                    if len(self._data)-self._index < self._header['data-length']:
+                    print self._index, len(self._data), self._header['data-length']
+                    if len(self._data)-self._index < int(self._header['data-length']):
                         break
                     else:
-                        self.onMessageComplete(self._data[self._index:self._index+self._header['data-length']])
-                        self._data = self._data[self._index+self._header['data-length']:]
+                        print 'complete'
+                        self.onMessageComplete(self._data[self._index:self._index+int(self._header['data-length'])])
+                        self._data = self._data[self._index+int(self._header['data-length']):]
                         self._state = 'new'
                         self._headerCount = 0
                         self._header = {}
