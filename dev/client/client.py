@@ -79,9 +79,9 @@ class Minicap():
 
     def onMessageComplete(self, msg):
         # print 'messge length:', len(msg)
-        self._toserversocket.send('1')
-        self._toserversocket('data-length:%s' % len(msg))
-        self._toserversocket(msg)
+        self._toserversocket.send('1\n')
+        self._toserversocket.send('data-length:%s\n' % len(msg))
+        self._toserversocket.send(msg)
 
 
         # if not self._tested:

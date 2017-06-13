@@ -9,6 +9,7 @@ class SocketHandler():
         self._server = None
         self._socks = {}
         self._chunks = {}
+        self.client = []
 
     def createSocketServer(self):
         serversocket = socket.socket()
@@ -29,7 +30,7 @@ class SocketHandler():
                 buf = buf+s
             if buf:
                 if not self._chunks.has_key(fd):
-                    self._chunks[fd] = Chunk()
+                    self._chunks[fd] = Chunk(self.client)
                 self._chunks[fd].add(buf)
             else:
                 self.onError(fd, evt)
@@ -53,17 +54,24 @@ class SocketHandler():
         ioloop.IOLoop.current().add_handler(sock.fileno(), self.onMessage, ioloop.IOLoop.READ+ioloop.IOLoop.ERROR)
         # ioloop.IOLoop.current().add_handler(sock.fileno(), self.onError, ioloop.IOLoop.ERROR)
 
+    def addClient(self, client):
+        self.client.append(client)
+
+    def removeClient(self, client):
+        self.client.remove(client)
+
 class NotEnoughtData(Exception):
     pass
 
 class Chunk():
 
-    def __init__(self):
+    def __init__(self,clients):
         self._data = ''
         self._state = 'new'
         self._index = 0
         self._header = {}
         self._headerCount = 0
+        self.clients = clients
 
     def data(self):
         return self._data
@@ -71,7 +79,6 @@ class Chunk():
     def getNextLine(self):
         i = self._index
         print 'get line'
-        print 'data:', self._data
         while True:
             if i >= len(self._data):
                 print 'should raise'
@@ -93,18 +100,16 @@ class Chunk():
         return self._data[old_index:i-1]
 
     def onMessageComplete(self, message):
-        print 'i got a message', message
-        pass
+        print 'i got a message', len(message)
+        for client in self.clients:
+            client.write_message(message.encode('utf8'))
 
     def add(self, chunk):
-        print 'chunk:', chunk
         self._data = self._data+chunk
-        print 'before:', self._data
         try:
             while True:
                 if self._state == 'new':
                     print 'status: new'
-                    print self
                     s = self.getNextLine()
                     print 's:', s
                     if not s.strip():
