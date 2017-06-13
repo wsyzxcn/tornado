@@ -32,7 +32,6 @@ class WebSocketHandler(websocket.WebSocketHandler):
     #     self.write("this is websocket handler")
 
     def on_message(self, message):
-
         print 'new message', message
 
 

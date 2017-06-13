@@ -102,7 +102,7 @@ class Chunk():
     def onMessageComplete(self, message):
         print 'i got a message', len(message)
         for client in self.clients:
-            client.write_message(message.encode('utf8'))
+            client.write_message(message,binary=True)
 
     def add(self, chunk):
         self._data = self._data+chunk
