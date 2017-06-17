@@ -1,10 +1,10 @@
+# -*-encoding:utf-8 -*-
 from tornado import ioloop
 import subprocess
 import socket
 import struct
 import os
 import numpy as np
-import cv2
 
 class Minitouch():
     pass
@@ -17,20 +17,18 @@ class Minicap():
         self._headerSize = -1
         self._frameSize = -1
         self._isFirst = True
-        self._toserversocket = None
-        pass
+        self._serverConn = None
+        self._assembler = Assembler()
+        self._deviceConn = None
 
     def start(self):
-        s = socket.socket()
-        s.connect(('127.0.0.1', 13130))
-        s.setblocking(False)
-        self._sock = s
-        self._tested = False
-
-        self._toserversocket = socket.socket()
-        self._toserversocket.connect(('127.0.0.1', 8889))
-
-        return s
+        self._deviceConn = socket.socket()
+        self._deviceConn.connect(('127.0.0.1', 13130))
+        self._deviceConn.setblocking(False)
+        fd = self._deviceConn.fileno()
+        self._serverConn = socket.socket()
+        self._serverConn.connect(('127.0.0.1', 8889))
+        return fd
 
     def onMessage(self, fd, evt):
         print 'new Message'
@@ -42,17 +40,35 @@ class Minicap():
                 if len(s) < 4096:
                     break
                 if len(tmp) > 1024 * 50:
-                    print 'exeed max:%s'%len(tmp)
+                    print 'exeed max:%s' % len(tmp)
                     break
             except socket.error as e:
                if e.errno == 10035:
                    break
+        self._assembler.feed(tmp)
 
 
-        self._buff += tmp
-        self.handleMessage()
+    def onFrameReady(self, frm):
+        # print 'messge length:', len(msg)
+        self._serverConn.send('1\n')
+        self._serverConn.send('data-length:%s\n' % len(frm))
+        self._serverConn.send(frm)
 
-    def handleMessage(self):
+
+class Assembler(object):
+    '''将从设备上读取的字节解析成图片桢'''
+    def __init__(self):
+        self._buff = ''
+        self._frameReadyListenner = []
+        self._isFirst = True
+        self._frameSize = -1
+        self._state = 'header'
+
+    def feed(self, buf):
+        self._buff += buf
+        self._assemble()
+
+    def _assemble(self):
         if self._isFirst:
             if len(self._buff) < 24:
                 return
@@ -71,24 +87,21 @@ class Minicap():
             if len(self._buff) < self._frameSize+4:
                 return
             else:
-                self.onMessageComplete(self._buff[4:4+self._frameSize])
+                self._onFrameReady(self._buff[4:4+self._frameSize])
                 self._buff = self._buff[4+self._frameSize:]
                 self._frameSize = -1
                 self._headerSize = -1
 
+    def _onFrameReady(self, frame):
+        for l in self._frameReadyListenner:
+            l(frame)
 
-    def onMessageComplete(self, msg):
-        # print 'messge length:', len(msg)
-        self._toserversocket.send('1\n')
-        self._toserversocket.send('data-length:%s\n' % len(msg))
-        self._toserversocket.send(msg)
+    def registFrameListener(self, func):
+        self._frameReadyListenner.append(func)
 
 
-        # if not self._tested:
-        #     fd = os.open('result.jpg', os.O_CREAT|os.O_WRONLY)
-        #     os.write(fd, msg)
-        #     os.close(fd)
-        #     self._tested = True
+
+
 class Uploader():
     pass
 
