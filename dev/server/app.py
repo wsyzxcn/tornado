@@ -2,8 +2,7 @@ import tornado
 import tornado.ioloop as ioloop
 import tornado.web as web
 import tornado.websocket as websocket
-import os
-import run.sockethandler as sockethandler
+from run import sockethandler
 
 sockHandler = sockethandler.SocketHandler()
 

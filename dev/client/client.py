@@ -4,7 +4,6 @@ import subprocess
 import socket
 import struct
 import os
-import numpy as np
 
 class Minitouch():
     pass
@@ -20,6 +19,7 @@ class Minicap():
         self._serverConn = None
         self._assembler = Assembler()
         self._deviceConn = None
+        self._assembler.registFrameListener(self.onFrameReady)
 
     def start(self):
         self._deviceConn = socket.socket()
@@ -53,6 +53,7 @@ class Minicap():
         self._serverConn.send('1\n')
         self._serverConn.send('data-length:%s\n' % len(frm))
         self._serverConn.send(frm)
+
 
 
 class Assembler(object):
@@ -110,6 +111,6 @@ if __name__ == '__main__':
     touch = Minitouch()
     p = subprocess.Popen("adb forward tcp:13130 localabstract:minicap", shell=True)
     p.wait()
-    ioloop.IOLoop.current().add_handler(cap.start().fileno(),
+    ioloop.IOLoop.current().add_handler(cap.start(),
                                         cap.onMessage, ioloop.IOLoop.READ+ioloop.IOLoop.ERROR)
     ioloop.IOLoop.current().start()
