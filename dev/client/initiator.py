@@ -13,7 +13,7 @@ def _checkDeviceConnected():
         resultList = re.findall("^\s*(.*)\s*device\s*$", output, re.M)
         print type(resultList[0])
         if resultList:
-            if len(resultList)>1:
+            if len(resultList) > 1:
                 print "more than one device detected, use the first one list by cmd adb devices"
             return resultList[0]
         else:
