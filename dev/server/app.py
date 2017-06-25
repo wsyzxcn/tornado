@@ -2,12 +2,14 @@ import tornado
 import tornado.ioloop as ioloop
 import tornado.web as web
 import tornado.websocket as websocket
-from run import sockethandler
+from run import transmitter
+import traceback
+import json
 
-sockHandler = sockethandler.SocketHandler()
+msgTransmitter = transmitter.Transmitter()
 
 class MainHandler(web.RequestHandler):
-    buff={}
+    buff = {}
 
     def get(self):
         if True:
@@ -21,27 +23,24 @@ class WebSocketHandler(websocket.WebSocketHandler):
 
     def open(self, *args, **kwargs):
         print 'a new connection'
-        global sockHandler
-        sockHandler.addClient(self)
 
-    def close(self, *args, **kwargs):
-        global sockethandler
-        sockHandler.removeClient(self)
-    # def get(self):
-    #     self.write("this is websocket handler")
+    def on_close(self, *args, **kwargs):
+        global msgTransmitter
+        print 'disconnect ws'
+        msgTransmitter.onWebHandlerDisconnect(self)
 
     def on_message(self, message):
-        print 'new message', message
+        global msgTransmitter
+        msgTransmitter.onwebHandlerMessage(self, message)
 
 
 
 def makeApp():
     return tornado.web.Application([(r"/", MainHandler), (r"/index.html", MainHandler),
-                                    (r"/connection", WebSocketHandler),])
+                                    (r"/connection", WebSocketHandler), ])
 if __name__ == '__main__':
     app = makeApp()
     app.listen(8888)
-
     loop = ioloop.IOLoop.current()
-    loop.add_handler(sockHandler.createSocketServer(), sockHandler.onConnection, ioloop.IOLoop.READ)
+    loop.add_handler(msgTransmitter.createSocketServer(), msgTransmitter._onDeviceSideConnection, ioloop.IOLoop.READ)
     ioloop.IOLoop.current().start()

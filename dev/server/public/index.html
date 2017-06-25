@@ -6,8 +6,6 @@
 </head>
 <style type="text/css">
     canvas#deviceview {
-        width:450px;
-        height:800px;
         border-color:blue blue blue blue;
         border-width:5px 5px 5px 5px;
         border-style:solid solid solid solid;
@@ -42,7 +40,6 @@
         ws.onerror = function() {
           console.log('onerror', arguments)
         }
-
         ws.onmessage = function(message) {
             console.log('new message')
             var blob = new Blob([message.data], {type: 'image/jpeg'})
@@ -54,7 +51,6 @@
                 canvas.height = img.height
                 g.drawImage(img, 0, 0)
                 img.onload = null
-                img.src = BLANK_IMG
                 img = null
                 u = null
                 blob = null
@@ -65,7 +61,7 @@
 
         ws.onopen = function() {
           console.log('onopen', arguments)
-          ws.send('1920x1080/0')
+          ws.send('{"deviceId":"e5ae5af4","cmd":"init"}')
         }
     }
 

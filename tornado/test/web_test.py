@@ -2085,7 +2085,7 @@ class StreamingRequestBodyTest(WebTestCase):
                 self.test.prepared.set_result(None)
 
             def data_received(self, data):
-                self.test.data.set_result(data)
+                self.test._data.set_result(data)
 
             def get(self):
                 self.test.finished.set_result(None)
