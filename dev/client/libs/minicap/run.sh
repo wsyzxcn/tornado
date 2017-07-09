@@ -12,8 +12,8 @@ sdk=$(adb shell getprop ro.build.version.sdk | tr -d '\r')
 pre=$(adb shell getprop ro.build.version.preview_sdk | tr -d '\r')
 rel=$(adb shell getprop ro.build.version.release | tr -d '\r')
 
-if [[ ! -z "$pre" ]]; then
-  sdk=$(($sdk + $pre))
+if [[ -z "$pre" ]]; then
+  sdk=$(($sdk + 1))
 fi
 
 # PIE is only supported since SDK 16

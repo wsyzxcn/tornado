@@ -14,7 +14,7 @@ _minicapProc = None
 _rotation = 0
 _cap = None
 _loop = None
-
+_server_addr = "www.staky.xin"
 
 class Minitouch():
     pass
@@ -34,11 +34,13 @@ class Minicap():
         self._fd = None
 
     def start(self):
+        global _server_addr
         self._deviceConn = self._connectDevice()
         fd = self._deviceConn.fileno()
         self._fd = fd
         self._serverConn = socket.socket()
-        self._serverConn.connect(('127.0.0.1', 8889))
+        self._serverConn.connect(("www.staky.xin", 8889))
+        print 'connected'
         print fd
         return fd
 

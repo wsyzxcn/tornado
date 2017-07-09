@@ -2,10 +2,11 @@
 import subprocess
 import re
 import sys
-import  devicestateobserver
+import devicestateobserver
 import os
 import minicap
 from tornado import ioloop
+
 
 def _checkDeviceConnected():
     output = subprocess.check_output("adb devices")
@@ -19,6 +20,7 @@ def _checkDeviceConnected():
         else:
             print "no device detected"
             sys.exit(0)
+
 
 def _prepareEnvirion(deviceId):
     """
@@ -37,6 +39,8 @@ def _prepareEnvirion(deviceId):
     p.wait()
     p = subprocess.Popen("adb -s %s shell chmod 777 /data/local/tmp/minicap"%deviceId)
     p.wait()
+
+
 def _getResolution(deviceId):
     width, height = 0, 0
     result = subprocess.check_output("adb -s %s shell wm size"%deviceId)
@@ -45,6 +49,8 @@ def _getResolution(deviceId):
         width = int(m.groups()[0])
         height = int(m.groups()[1])
     return width, height
+
+
 def _getRotation():
     rotation = 0
     output = subprocess.check_output("adb -d shell dumpsys display")
@@ -53,6 +59,7 @@ def _getRotation():
         if m:
             rotation = int(m.groups()[0]) * 90
     return rotation
+
 
 def initiate():
     deviceId = _checkDeviceConnected()
@@ -64,6 +71,7 @@ def initiate():
     minicap.setResolution(width, height)
     rotation = _getRotation()
     minicap.start(deviceId, rotation)
+    print 'init finished'
     ioloop.IOLoop.current().start()
 
 if __name__ == '__main__':
